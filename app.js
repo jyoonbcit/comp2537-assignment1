@@ -54,3 +54,5 @@ app.get('/login', (req, res) => {
     </form>
     `)
 });
+
+module.exports = app;
