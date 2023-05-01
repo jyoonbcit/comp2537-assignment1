@@ -9,7 +9,7 @@ dotenv.config();
 app.use(express.urlencoded({ extended: false }))
 // TODO: update URI and collection name
 var dbStore = new MongoDBStore({
-    uri: 'mongodb://127.0.0.1:27017/sample',
+    uri: process.env.MONGODB_CONNECTION_STRING,
     collection: 'sample'
 });
 // TODO: learn how this works
@@ -29,6 +29,7 @@ app.get('/', (req, res) => {
         <button onclick="window.location.href='/login'">Log in</button>
         `)
     } else {
+        console.log(req.session);
         res.send(`
         <p> Hello, ${req.session.loggedName}! </p>
         <button onclick="window.location.href='/members'">Go to Members Area</button>
@@ -46,6 +47,49 @@ app.get('/signup', (req, res) => {
         <input type='submit' value='Sign up' />
     </form>
     `)
+});
+
+// TODO: use JOI to prevent NoSQL injection attacks
+app.post('/signup', async (req, res) => {
+    try {
+        const result = await usersModel.findOne({
+            email: req.body.email
+        })
+        if (result === null && req.body.name && req.body.email && req.body.password) {
+            const newUserPassword = bcrypt.hashSync(req.body.password, 10);
+            const newUser = new usersModel({
+                name: req.body.name,
+                email: req.body.email,
+                password: newUserPassword
+            });
+            console.log('Registered successfully.');
+            await newUser.save();
+            res.redirect('/login');
+        } else if (!req.body.name) {
+            res.send(`
+            <h1> Name is required. </h1>
+            <a href='/signup'"> Try again. </a>
+            `)
+        } else if (!req.body.email) {
+            res.send(`
+            <h1> Email is required. </h1>
+            <a href='/signup'"> Try again. </a>
+            `)
+        } else if (!req.body.password) {
+            res.send(`
+            <h1> Password is required. </h1>
+            <a href='/signup'"> Try again. </a>
+            `)
+        } else {
+            res.send(`
+            <h1> Email already exists. </h1>
+            <a href='/signup'"> Try again. </a>
+            `);
+        }
+    } catch (err) {
+        console.log(err);
+        res.send('Error signing up');
+    }
 });
 
 app.get('/login', (req, res) => {
@@ -67,22 +111,50 @@ app.post('/login', async (req, res) => {
         console.log(result)
         if (result === null) {
             res.send(`
-            <h1> No such email exists. </h1>
+            <h1> Invalid email/password combination. </h1>
+            <a href='/login'"> Try again. </a>
             `)
         } else if (bcrypt.compareSync(req.body.password, result?.password)) {
             req.session.GLOBAL_AUTHENTICATED = true;
-            req.session.loggedName = req.body.name;
+            req.session.loggedName = result.name;
             req.session.loggedEmail = req.body.email;
             req.session.loggedPassword = req.body.password;
             res.redirect('/');
         } else {
             res.send(`
-            <h1> Wrong password. </h1>
+            <h1> Invalid email/password combination. </h1>
+            <a href='/login'"> Try again. </a>
             `)
         }
     } catch (err) {
         console.log(err);
     }
+});
+
+app.use(express.static('public'));
+app.get('/members', (req, res) => {
+    if (req.session.GLOBAL_AUTHENTICATED) {
+        const randomImageNumber = Math.floor(Math.random() * 3) + 1;
+        res.send(`
+        <h1> Hello ${req.session.loggedName}! </h1>
+        <img src='00${randomImageNumber}.png' width=300px />
+        <br>
+        <button onclick="window.location.href='/logout'">Logout</button>
+        `);
+    } else {
+        res.redirect('/');
+    }
+});
+
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
+});
+
+app.get('*', function (req, res) {
+    res.status(404).send(`
+    <p> Page not found - 404 </p>
+    `);
 });
 
 
