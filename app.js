@@ -18,7 +18,7 @@ var dbStore = new MongoDBStore({
 // TODO: learn how this works
 // Session storage setup
 app.use(session({
-    secret: '1234',
+    secret: process.env.MONGODB_SESSION_SECRET,
     store: dbStore,
     resave: false,
     saveUninitialized: false
@@ -136,6 +136,9 @@ app.post('/login', async (req, res) => {
             req.session.loggedName = result.name;
             req.session.loggedEmail = req.body.email;
             req.session.loggedPassword = req.body.password;
+            var hour = 3600000;
+            req.session.cookie.expires = new Date(Date.now() + (hour));
+            req.session.cookie.maxAge = hour;
             res.redirect('/');
         } else {
             res.send(`
