@@ -15,7 +15,6 @@ var dbStore = new MongoDBStore({
     uri: process.env.MONGODB_CONNECTION_STRING,
     collection: 'users'
 });
-// TODO: learn how this works
 // Session storage setup
 app.use(session({
     secret: process.env.MONGODB_SESSION_SECRET,
@@ -52,7 +51,6 @@ app.get('/signup', (req, res) => {
     `)
 });
 
-// TODO: use JOI to prevent NoSQL injection attacks
 app.post('/signup', async (req, res) => {
     try {
         const schema = Joi.object({
@@ -179,5 +177,4 @@ app.get('*', function (req, res) {
 
 
 
-// TODO: why is this needed?
 module.exports = app;
