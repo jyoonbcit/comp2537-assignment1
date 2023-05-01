@@ -6,6 +6,13 @@ const usersModel = require('./models/users');
 var MongoDBStore = require('connect-mongodb-session')(session);
 const dotenv = require('dotenv');
 dotenv.config();
+const Joi = require('joi');
+const schema = Joi.object({
+    name: Joi.string().alphanum().max(20).required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().max(20).required()
+});
+// const validationResult = schema.validate(req.body);
 app.use(express.urlencoded({ extended: false }))
 // TODO: update URI and collection name
 var dbStore = new MongoDBStore({
@@ -51,6 +58,15 @@ app.get('/signup', (req, res) => {
 
 // TODO: use JOI to prevent NoSQL injection attacks
 app.post('/signup', async (req, res) => {
+    try {
+        const validationResult = await schema.validateAsync({name: req.body.name, email: req.body.email, password: req.body.password});
+    } catch (err) {
+        res.send(`
+        <h1> ${err.details[0].message} </h1>
+        <a href='/signup'"> Try again. </a>
+        `)
+        return;
+    };
     try {
         const result = await usersModel.findOne({
             email: req.body.email
@@ -103,6 +119,15 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
+    try {
+        const validationResult = await schema.validateAsync({ name: req.body.name, email: req.body.email, password: req.body.password });
+    } catch (err) {
+        res.send(`
+        <h1> ${err.details[0].message} </h1>
+        <a href='/signup'"> Try again. </a>
+        `)
+        return;
+    };
     try {
         // set a global variable to true if the user is authenticated
         const result = await usersModel.findOne({
