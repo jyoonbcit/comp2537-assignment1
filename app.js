@@ -7,14 +7,10 @@ var MongoDBStore = require('connect-mongodb-session')(session);
 const dotenv = require('dotenv');
 dotenv.config();
 const Joi = require('joi');
-const schema = Joi.object({
-    name: Joi.string().alphanum().max(20).required(),
-    email: Joi.string().email().required(),
-    password: Joi.string().max(20).required()
-});
 // const validationResult = schema.validate(req.body);
-app.use(express.urlencoded({ extended: false }))
-// TODO: update URI and collection name
+app.use(express.urlencoded({ extended: false }));
+// For testing purposes (joi)
+// app.use(express.json());
 var dbStore = new MongoDBStore({
     uri: process.env.MONGODB_CONNECTION_STRING,
     collection: 'sample'
@@ -59,7 +55,12 @@ app.get('/signup', (req, res) => {
 // TODO: use JOI to prevent NoSQL injection attacks
 app.post('/signup', async (req, res) => {
     try {
-        const validationResult = await schema.validateAsync({name: req.body.name, email: req.body.email, password: req.body.password});
+        const schema = Joi.object({
+            name: Joi.string().regex(/^[\w\-\s]+$/).max(20).required(),
+            email: Joi.string().email().required(),
+            password: Joi.string().max(20).required()
+        });
+        const validationResult = await schema.validateAsync({ name: req.body.name, email: req.body.email, password: req.body.password });
     } catch (err) {
         res.send(`
         <h1> ${err.details[0].message} </h1>
@@ -81,21 +82,6 @@ app.post('/signup', async (req, res) => {
             console.log('Registered successfully.');
             await newUser.save();
             res.redirect('/login');
-        } else if (!req.body.name) {
-            res.send(`
-            <h1> Name is required. </h1>
-            <a href='/signup'"> Try again. </a>
-            `)
-        } else if (!req.body.email) {
-            res.send(`
-            <h1> Email is required. </h1>
-            <a href='/signup'"> Try again. </a>
-            `)
-        } else if (!req.body.password) {
-            res.send(`
-            <h1> Password is required. </h1>
-            <a href='/signup'"> Try again. </a>
-            `)
         } else {
             res.send(`
             <h1> Email already exists. </h1>
@@ -120,11 +106,17 @@ app.get('/login', (req, res) => {
 
 app.post('/login', async (req, res) => {
     try {
-        const validationResult = await schema.validateAsync({ name: req.body.name, email: req.body.email, password: req.body.password });
+        const schema = Joi.object({
+                email: Joi.string().email().required(),
+                password: Joi.string().max(20).required()
+            });
+        console.log("Returns: " + req.body.password);
+        const validationResult = await schema.validateAsync({ email: req.body.email, password: req.body.password });
     } catch (err) {
+        console.log(err)
         res.send(`
         <h1> ${err.details[0].message} </h1>
-        <a href='/signup'"> Try again. </a>
+        <a href='/login'"> Try again. </a>
         `)
         return;
     };
