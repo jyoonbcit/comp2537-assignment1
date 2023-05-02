@@ -140,7 +140,7 @@ app.post('/login', async (req, res) => {
             var hour = 3600000;
             req.session.cookie.expires = new Date(Date.now() + (hour));
             req.session.cookie.maxAge = hour;
-            res.redirect('/');
+            res.redirect('/members');
         } else {
             res.send(`
             <h1> Invalid email/password combination. </h1>
