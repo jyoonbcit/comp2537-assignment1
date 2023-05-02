@@ -20,7 +20,10 @@ app.use(session({
     secret: process.env.MONGODB_SESSION_SECRET,
     store: dbStore,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 3600000
+    }
 }));
 
 app.get('/', (req, res) => {
