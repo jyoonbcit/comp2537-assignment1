@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: false }));
 // app.use(express.json());
 var dbStore = new MongoDBStore({
     uri: process.env.MONGODB_CONNECTION_STRING,
-    collection: 'users'
+    collection: 'sessions'
 });
 // Session storage setup
 app.use(session({
