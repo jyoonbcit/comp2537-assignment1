@@ -21,9 +21,7 @@ app.use(session({
     store: dbStore,
     resave: false,
     saveUninitialized: false,
-    cookie: {
-        maxAge: 3600000
-    }
+    expires: new Date(Date.now() + 3600000)
 }));
 
 app.get('/', (req, res) => {
