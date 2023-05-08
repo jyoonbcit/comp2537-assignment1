@@ -26,12 +26,10 @@ app.use(session({
 }));
 
 app.get('/', (req, res) => {
-    if (!req.session.GLOBAL_AUTHENTICATED) {
-        res.render('index/not_authenticated.ejs');
-    } else {
-        console.log(req.session);
-        res.render('index/authenticated.ejs', { 'name': req.session.loggedName })
-    }
+    res.render('index.ejs', { 
+        'name': req.session.loggedName, 
+        'authenticated': req.session.GLOBAL_AUTHENTICATED 
+    });
 });
 
 app.get('/signup', (req, res) => {
