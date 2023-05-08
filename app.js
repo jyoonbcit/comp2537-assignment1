@@ -47,10 +47,7 @@ app.post('/signup', async (req, res) => {
         });
         const validationResult = await schema.validateAsync({ name: req.body.name, email: req.body.email, password: req.body.password });
     } catch (err) {
-        res.send(`
-        <h1> ${err.details[0].message} </h1>
-        <a href='/signup'"> Try again. </a>
-        `)
+        res.render('signup/signup_regex.ejs', { 'error': err.details[0].message });
         return;
     };
     try {
@@ -67,14 +64,11 @@ app.post('/signup', async (req, res) => {
             await newUser.save();
             res.redirect('/login');
         } else {
-            res.send(`
-            <h1> Email already exists. </h1>
-            <a href='/signup'"> Try again. </a>
-            `);
+            res.render('signup/signup_existing_email.ejs');
         }
     } catch (err) {
         console.log(err);
-        res.send('Error signing up');
+        res.render('signup/signup_error.ejs');
     }
 });
 
@@ -91,11 +85,8 @@ app.post('/login', async (req, res) => {
         console.log("Returns: " + req.body.password);
         const validationResult = await schema.validateAsync({ email: req.body.email, password: req.body.password });
     } catch (err) {
-        console.log(err)
-        res.send(`
-        <h1> ${err.details[0].message} </h1>
-        <a href='/login'"> Try again. </a>
-        `)
+        console.log(err);
+        res.render('login/login_regex.ejs', { 'error': err.details[0].message });
         return;
     };
     try {
@@ -105,7 +96,7 @@ app.post('/login', async (req, res) => {
         })
         console.log(result)
         if (result === null) {
-            res.render('invalid_email_password.ejs');
+            res.render('login/login_error.ejs');
         } else if (bcrypt.compareSync(req.body.password, result?.password)) {
             req.session.GLOBAL_AUTHENTICATED = true;
             req.session.loggedName = result.name;
@@ -116,7 +107,7 @@ app.post('/login', async (req, res) => {
             req.session.cookie.maxAge = hour;
             res.redirect('/members');
         } else {
-            res.render('invalid_email_password.ejs');
+            res.render('login/login_error.ejs');
         }
     } catch (err) {
         console.log(err);
