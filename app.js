@@ -8,6 +8,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 const Joi = require('joi');
 // const validationResult = schema.validate(req.body);
+app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
 // For testing purposes (joi)
 // app.use(express.json());
@@ -42,14 +43,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/signup', (req, res) => {
-    res.send(`
-    <form action='/signup' method='post'>
-        <input type='text' name='name' placeholder='Enter your name' />
-        <input type='text' name='email' placeholder='Enter your email' />
-        <input type='text' name='password' placeholder='Enter your password' />
-        <input type='submit' value='Sign up' />
-    </form>
-    `)
+    res.render('signup.ejs');
 });
 
 app.post('/signup', async (req, res) => {
@@ -94,13 +88,7 @@ app.post('/signup', async (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.send(`
-    <form action='/login' method='post'>
-        <input type='text' name='email' placeholder='Enter your email' />
-        <input type='text' name='password' placeholder='Enter your password' />
-        <input type='submit' value='Login' />
-    </form>
-    `)
+    res.render('login.ejs');
 });
 
 app.post('/login', async (req, res) => {
