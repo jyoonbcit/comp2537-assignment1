@@ -57,7 +57,8 @@ app.post('/signup', async (req, res) => {
             const newUser = new usersModel({
                 name: req.body.name,
                 email: req.body.email,
-                password: newUserPassword
+                password: newUserPassword,
+                type: 'user'
             });
             await newUser.save();
             res.redirect('/login');
@@ -127,8 +128,46 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-app.get('/admin', (req, res) => {
-    res.render('admin.ejs');
+app.get('/admin', async (req, res) => {
+    const result = await usersModel.find({});
+    res.render('admin.ejs', {'users': result});
+});
+
+app.post('/admin/promote', async (req, res) => {
+    const user = req.body;
+    try {
+        const result = await usersModel.updateOne(
+        {
+            _id: user.id
+        },
+        {
+            $set: {
+                type: 'admin'
+            }
+        });
+        console.log('Promoted user');
+        res.redirect('/admin');
+    } catch (err) {
+        console.log(err);
+    }
+});
+
+app.post('/admin/demote', async (req, res) => {
+    const user = req.body;
+    try {
+        const result = await usersModel.updateOne(
+            {
+                _id: user.id
+            },
+            {
+                $set: {
+                    type: 'user'
+                }
+            });
+            res.redirect('/admin');
+    } catch (err) {
+        console.log(err);
+    }
 });
 
 app.get('*', function (req, res) {
