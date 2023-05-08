@@ -73,7 +73,7 @@ app.post('/signup', async (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.render('login.ejs');
+    res.render('login/login.ejs');
 });
 
 app.post('/login', async (req, res) => {
@@ -118,12 +118,7 @@ app.use(express.static('public'));
 app.get('/members', (req, res) => {
     if (req.session.GLOBAL_AUTHENTICATED) {
         const randomImageNumber = Math.floor(Math.random() * 3) + 1;
-        res.send(`
-        <h1> Hello ${req.session.loggedName}! </h1>
-        <img src='00${randomImageNumber}.png' width=300px />
-        <br>
-        <button onclick="window.location.href='/logout'">Logout</button>
-        `);
+        res.render('members/members.ejs', { 'name': req.session.loggedName, 'image': randomImageNumber })
     } else {
         res.redirect('/');
     }
@@ -134,10 +129,12 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
+app.get('/admin', (req, res) => {
+    res.render('admin/admin.ejs');
+});
+
 app.get('*', function (req, res) {
-    res.status(404).send(`
-    <p> Page not found - 404 </p>
-    `);
+    res.status(404).render('404.ejs')
 });
 
 
