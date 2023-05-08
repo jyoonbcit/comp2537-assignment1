@@ -27,18 +27,10 @@ app.use(session({
 
 app.get('/', (req, res) => {
     if (!req.session.GLOBAL_AUTHENTICATED) {
-        res.send(`
-        <button onclick="window.location.href='/signup'">Sign up</button>
-        <br>
-        <button onclick="window.location.href='/login'">Log in</button>
-        `)
+        res.render('index/not_authenticated.ejs');
     } else {
         console.log(req.session);
-        res.send(`
-        <p> Hello, ${req.session.loggedName}! </p>
-        <button onclick="window.location.href='/members'">Go to Members Area</button>
-        <button onclick="window.location.href='/logout'">Logout</button>
-        `)
+        res.render('index/authenticated.ejs', { 'name': req.session.loggedName })
     }
 });
 
@@ -114,10 +106,7 @@ app.post('/login', async (req, res) => {
         })
         console.log(result)
         if (result === null) {
-            res.send(`
-            <h1> Invalid email/password combination. </h1>
-            <a href='/login'"> Try again. </a>
-            `)
+            res.render('invalid_email_password.ejs');
         } else if (bcrypt.compareSync(req.body.password, result?.password)) {
             req.session.GLOBAL_AUTHENTICATED = true;
             req.session.loggedName = result.name;
@@ -128,10 +117,7 @@ app.post('/login', async (req, res) => {
             req.session.cookie.maxAge = hour;
             res.redirect('/members');
         } else {
-            res.send(`
-            <h1> Invalid email/password combination. </h1>
-            <a href='/login'"> Try again. </a>
-            `)
+            res.render('invalid_email_password.ejs');
         }
     } catch (err) {
         console.log(err);
