@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/signup', (req, res) => {
-    res.render('signup/signup.ejs');
+    res.render('signup.ejs');
 });
 
 app.post('/signup', async (req, res) => {
@@ -73,7 +73,7 @@ app.post('/signup', async (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.render('login/login.ejs');
+    res.render('login.ejs');
 });
 
 app.post('/login', async (req, res) => {
@@ -118,7 +118,7 @@ app.use(express.static('public'));
 app.get('/members', (req, res) => {
     if (req.session.GLOBAL_AUTHENTICATED) {
         const randomImageNumber = Math.floor(Math.random() * 3) + 1;
-        res.render('members/members.ejs', { 'name': req.session.loggedName, 'image': randomImageNumber })
+        res.render('members.ejs', { 'name': req.session.loggedName, 'image': randomImageNumber })
     } else {
         res.redirect('/');
     }
@@ -130,7 +130,7 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
-    res.render('admin/admin.ejs');
+    res.render('admin.ejs');
 });
 
 app.get('*', function (req, res) {
