@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/signup', (req, res) => {
-    res.render('signup.ejs');
+    res.render('signup/signup.ejs');
 });
 
 app.post('/signup', async (req, res) => {
@@ -64,7 +64,6 @@ app.post('/signup', async (req, res) => {
                 email: req.body.email,
                 password: newUserPassword
             });
-            console.log('Registered successfully.');
             await newUser.save();
             res.redirect('/login');
         } else {
