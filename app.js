@@ -45,7 +45,10 @@ app.post('/signup', async (req, res) => {
         });
         const validationResult = await schema.validateAsync({ name: req.body.name, email: req.body.email, password: req.body.password });
     } catch (err) {
-        res.render('signup/signup_regex.ejs', { 'error': err.details[0].message });
+        res.send(`
+        <h1> ${err.details[0].message} </h1>
+        <a href='/signup'> Try again. </a>
+        `);
         return;
     };
     try {
@@ -63,11 +66,16 @@ app.post('/signup', async (req, res) => {
             await newUser.save();
             res.redirect('/login');
         } else {
-            res.render('signup/signup_existing_email.ejs');
+            res.send(`
+            <h1> Email already exists. </h1>
+            <a href='/signup'> Try again. </a>
+            `)
         }
     } catch (err) {
         console.log(err);
-        res.render('signup/signup_error.ejs');
+        res.send(`
+        <p> Error signing up </p>
+        `);
     }
 });
 
@@ -85,7 +93,10 @@ app.post('/login', async (req, res) => {
         const validationResult = await schema.validateAsync({ email: req.body.email, password: req.body.password });
     } catch (err) {
         console.log(err);
-        res.render('login/login_regex.ejs', { 'error': err.details[0].message });
+        res.send(`
+        <h1> ${err.details[0].message} </h1>
+        <a href='/login'> Try again. </a>
+        `)
         return;
     };
     try {
@@ -95,7 +106,10 @@ app.post('/login', async (req, res) => {
         })
         console.log(result)
         if (result === null) {
-            res.render('login/login_error.ejs');
+            res.send(`
+            <h1> Invalid email/password combination. </h1>
+            <a href='/login'> Try again. </a>
+            `);
         } else if (bcrypt.compareSync(req.body.password, result?.password)) {
             req.session.GLOBAL_AUTHENTICATED = true;
             req.session.loggedName = result.name;
@@ -107,7 +121,10 @@ app.post('/login', async (req, res) => {
             req.session.cookie.maxAge = hour;
             res.redirect('/members');
         } else {
-            res.render('login/login_error.ejs');
+            res.send(`
+            <h1> Invalid email/password combination. </h1>
+            <a href='/login'> Try again. </a>
+            `);
         }
     } catch (err) {
         console.log(err);
