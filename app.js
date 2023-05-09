@@ -147,9 +147,16 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/admin', async (req, res) => {
-    const result = await usersModel.find({});
-    console.log(req.session.GLOBAL_AUTHENTICATED + " " + req.session.loggedType);
-    res.render('admin.ejs', {'users': result, 'authenticated_admin': req.session.GLOBAL_AUTHENTICATED && req.session.loggedType === 'admin'});
+    if (!req.session.GLOBAL_AUTHENTICATED || req.session.loggedType !== 'admin') {
+        res.status(403).send(`
+        <h1> You are not authorized to view this page. </h1>
+        `);
+        return;
+    } else {
+        const result = await usersModel.find({});
+        console.log(req.session.GLOBAL_AUTHENTICATED + " " + req.session.loggedType);
+        res.render('admin.ejs', {'users': result, 'authenticated_admin': req.session.GLOBAL_AUTHENTICATED && req.session.loggedType === 'admin'});
+    }
 });
 
 app.post('/admin/promote', async (req, res) => {
@@ -190,7 +197,7 @@ app.post('/admin/demote', async (req, res) => {
 });
 
 app.get('*', function (req, res) {
-    res.status(404).render('404.ejs')
+    res.status(404).render('404.ejs');
 });
 
 
