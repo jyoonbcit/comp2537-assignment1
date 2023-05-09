@@ -101,6 +101,7 @@ app.post('/login', async (req, res) => {
             req.session.loggedName = result.name;
             req.session.loggedEmail = req.body.email;
             req.session.loggedPassword = req.body.password;
+            req.session.loggedType = result.type;
             var hour = 3600000;
             req.session.cookie.expires = new Date(Date.now() + (hour));
             req.session.cookie.maxAge = hour;
@@ -130,7 +131,8 @@ app.get('/logout', (req, res) => {
 
 app.get('/admin', async (req, res) => {
     const result = await usersModel.find({});
-    res.render('admin.ejs', {'users': result});
+    console.log(req.session.GLOBAL_AUTHENTICATED + " " + req.session.loggedType);
+    res.render('admin.ejs', {'users': result, 'authenticated_admin': req.session.GLOBAL_AUTHENTICATED && req.session.loggedType === 'admin'});
 });
 
 app.post('/admin/promote', async (req, res) => {
@@ -148,7 +150,7 @@ app.post('/admin/promote', async (req, res) => {
         console.log('Promoted user');
         res.redirect('/admin');
     } catch (err) {
-        console.log(err);
+        res.send("An error occurred.");
     }
 });
 
@@ -166,7 +168,7 @@ app.post('/admin/demote', async (req, res) => {
             });
             res.redirect('/admin');
     } catch (err) {
-        console.log(err);
+        res.send("An error occurred.");
     }
 });
 
