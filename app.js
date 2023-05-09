@@ -147,7 +147,10 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/admin', async (req, res) => {
-    if (!req.session.GLOBAL_AUTHENTICATED || req.session.loggedType !== 'admin') {
+    if (!req.session.GLOBAL_AUTHENTICATED) {
+        res.redirect('/login');
+        return;
+    } else if (req.session.loggedType !== 'admin') {
         res.status(403).send(`
         <h1> You are not authorized to view this page. </h1>
         `);
